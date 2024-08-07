@@ -192,3 +192,4 @@ if __name__ == "__main__":
         print("Data collection stopped by user.")
     finally:
         reader.close_serial_connection()
+gi
