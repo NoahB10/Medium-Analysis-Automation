@@ -1,6 +1,3 @@
-# Script by Moshe Kashlinsky, Undergraduate at UMD
-# Contact at kashlinskymoshe@gmail.com
-
 import bluetooth
 import threading
 from core import connect
@@ -49,9 +46,9 @@ class Pump:
 
         Args:
             pump_conn: An object representing the pump connection.
-        """
+        """ 
         self.pump_conn = pump_conn
-        self.pump_conn.openConnection()
+        pump_conn.openConnection()
 
     def send_settings(self, volume, rate, delay): 
         """
@@ -208,20 +205,20 @@ class AmuzaConnection:
                 logging.info("Sent Sampling Command")
                 print("Sent Sampling Command")
                 # One way to write the methods are from well location names and time
-                time1 = 127
+                time1 = 30
                 loc1 = ['H2']
                 loc1_m = self.well_mapping(loc1)
-                method1 = Method(loc1_m,time1)
-                time2 = 307 #Add seven seconds because it takes that long to reach well
+                method1 = Sequence([Method(loc1_m,time1)])
+                time2 = 30 #Add seven seconds because it takes that long to reach well
                 loc2 = ['G2']
                 loc2_m = self.well_mapping(loc2)
                 loc3 = ['F2']
                 loc3_m = self.well_mapping(loc3)
                 loc4 = ['G1']
                 loc4_m = self.well_mapping(loc4)
-                method2 = Method(loc2_m,time2)
-                method3 = Method(loc3_m,time2)
-                method4 = Method(loc4_m,time2)
+                method2 = Sequence([Method(loc2_m,time2)])
+                method3 = Sequence([Method(loc3_m,time2)])
+                method4 = Sequence([Method(loc4_m,time2)])
                 rate1 = 150
                 rate2 = 100
                 self.Control_Move([method1,method2,method1,method3],[rate1,rate2,rate2,rate2],[time1,time2,time2,time2])
@@ -334,20 +331,25 @@ class AmuzaConnection:
     
     def Insert(self):
         self.socket.send("@Z\n")
+        
     
     def Stop(self):
         self.socket.send("@T\n")
+        pump.stop_pump()
     
     def Move(self, sequence):
         self.socket.send(str(sequence))
 
     def Control_Move(self,method,rate,duration):
-        for i in range(0, len(method)):
-            sequence = Sequence(method[i])
-            self.Move(sequence)
-            pump.send_settings(1000,rate[i],0)
+        for i in range(0, len(duration)):
+            #sequence = Sequence(method[i])
+            print(i)
+            print(method[i])
+            self.Move(method[i])
+            time.sleep(4)
+            pump.send_settings(-1000,rate[i],0)
             pump.start_pump()
-            time.sleep(duration[i])
+            time.sleep(duration[i]-2)
             pump.stop_pump()
  
     def AdjustTemp(self, temperature):
@@ -419,6 +421,7 @@ if __name__ == '__main__':
     port = '/dev/ttyUSB0' #for linux and windows is 'COM15'
     # initiate Connection 
     PUMP_conn = connect.Connection(port= port,baudrate=baudrate, multipump=False)
+    pump = Pump(PUMP_conn)
     # Setup parameters for pump 
     direction = -1   #Make positive for infuse and negative for withdrae
     units='μL/min'		 	# OPTIONS: 'mL/min','mL/hr','μL/min','μL/hr'
@@ -430,7 +433,7 @@ if __name__ == '__main__':
         diameter = 14.5 # 10ml syringe has diameter of 14.5
     PUMP_conn.setUnits(units)
     PUMP_conn.setDiameter(diameter) 
-    pump = Pump(PUMP_conn)
+    
     connection = AmuzaConnection(True)
     connection.connect()
     connection.consoleInterface()
