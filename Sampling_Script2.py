@@ -341,18 +341,15 @@ class AmuzaConnection:
     def Move(self, sequence):
         self.socket.send(str(sequence))
 
-    def Control_Move(self, method,rate,duration):
+    def Control_Move(self,method,rate,duration):
         for i in range(0, len(method)):
-            if i != 0:
-                Pump.stop_pump()
             sequence = Sequence(method[i])
             self.Move(sequence)
-            Pump.send_settings(1000,rate[i],0)
-            Pump.start_pump()
+            pump.send_settings(1000,rate[i],0)
+            pump.start_pump()
             time.sleep(duration[i])
-        Pump.stop_pump()
-
-    
+            pump.stop_pump()
+ 
     def AdjustTemp(self, temperature):
         if not isinstance(methods, float):
             raise TypeError("\'methods\' must be of type float")
@@ -431,10 +428,9 @@ if __name__ == '__main__':
         diameter = 4.78 # 1ml syringe has diameter of 4.78
     elif syringe == 10:
         diameter = 14.5 # 10ml syringe has diameter of 14.5
-    rate = 100
     PUMP_conn.setUnits(units)
     PUMP_conn.setDiameter(diameter) 
-    pump = Pump(PUMP_conn,rate)
+    pump = Pump(PUMP_conn)
     connection = AmuzaConnection(True)
     connection.connect()
     connection.consoleInterface()
