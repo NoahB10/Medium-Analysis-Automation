@@ -151,7 +151,7 @@ class AmuzaConnection:
                     datefmt='%Y-%m-%d %H:%M:%S')
         
         currentTime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_handler = logging.FileHandler(f'AMUZA-{currentTime}.log')
+        file_handler = logging.FileHandler(f'logs/AMUZA-{currentTime}.log')
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s'))
         
@@ -205,23 +205,26 @@ class AmuzaConnection:
                 logging.info("Sent Sampling Command")
                 print("Sent Sampling Command")
                 # One way to write the methods are from well location names and time
-                time1 = 30
-                loc1 = ['H2']
+                time1 = 347
+                loc1 = ['D6']
                 loc1_m = self.well_mapping(loc1)
                 method1 = Sequence([Method(loc1_m,time1)])
-                time2 = 30 #Add seven seconds because it takes that long to reach well
-                loc2 = ['G2']
+                time2 = 407 #Add seven seconds because it takes that long to reach well
+                loc2 = ['E6']
                 loc2_m = self.well_mapping(loc2)
-                loc3 = ['F2']
+                loc3 = ['F6']
                 loc3_m = self.well_mapping(loc3)
-                loc4 = ['G1']
-                loc4_m = self.well_mapping(loc4)
+                loc4 = ['G6']
+                loc4_m = self.well_mapping(loc4)ss
+                loc5 = ['H6']
+                loc5_m = self.well_mapping(loc5)
                 method2 = Sequence([Method(loc2_m,time2)])
-                method3 = Sequence([Method(loc3_m,time2)])
+                method3 = Sequence([Method(loc3_m,time1)])
                 method4 = Sequence([Method(loc4_m,time2)])
+                method5 = Sequence([Method(loc5_m,time1)])
                 rate1 = 150
                 rate2 = 100
-                self.Control_Move([method1,method2,method1,method3],[rate1,rate2,rate2,rate2],[time1,time2,time2,time2])
+                self.Control_Move([method1,method2,method3,method4,method5],[rate1,rate2,rate2,rate2,rate2],[time1,time2,time1,time2,time1])
             if(command[:4]=="TEMP"):
                 logging.info(f"Adjusting Temp To {command[5:]}") # extra char to remove space
                 self.AdjustTemp(float(command[5:]))
@@ -343,14 +346,28 @@ class AmuzaConnection:
     def Control_Move(self,method,rate,duration):
         for i in range(0, len(duration)):
             #sequence = Sequence(method[i])
-            print(i)
-            print(method[i])
             self.Move(method[i])
-            time.sleep(4)
             pump.send_settings(-1000,rate[i],0)
+            time.sleep(8)
             pump.start_pump()
-            time.sleep(duration[i]-2)
+            time.sleep(duration[i]-10)
             pump.stop_pump()
+            time.sleep(12) # Use a minimum delay of 4.5s but likely will need longer
+            #Now clean by dipping into the vat at exit
+            """
+            for i in range(0,20):
+                self.socket.send("@q,01,0,000,0000,241,180,0")
+                print(i)
+                time.sleep(1)
+            pump.send_settings(-1000,200,0)
+            pump.start_pump()
+            time.sleep(30)
+            pump.stop_pump()
+            for i in range(0,5):
+                self.NeedleUp()
+                time.sleep(.5)
+            self.Stop()
+            """
  
     def AdjustTemp(self, temperature):
         if not isinstance(methods, float):
