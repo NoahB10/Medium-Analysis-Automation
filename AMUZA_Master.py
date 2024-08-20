@@ -159,20 +159,20 @@ class AmuzaConnection:
                 print("Sent Sampling Command")
                 # One way to write the methods are from well location names and time
                 time1 = 127
-                loc1 = ['D1']
+                loc1 = ['H2']
                 loc1_m = self.well_mapping(loc1)
                 method1 = Method(loc1_m,time1)
-                time2 = 457 #Add seven seconds because it takes that long to reach well
-                loc2 = ['E1']
+                time2 = 307 #Add seven seconds because it takes that long to reach well
+                loc2 = ['G2']
                 loc2_m = self.well_mapping(loc2)
-                loc3 = ['F1']
+                loc3 = ['F2']
                 loc3_m = self.well_mapping(loc3)
                 loc4 = ['G1']
                 loc4_m = self.well_mapping(loc4)
                 method2 = Method(loc2_m,time2)
                 method3 = Method(loc3_m,time2)
                 method4 = Method(loc4_m,time2)
-                sequence = Sequence([method1,method2,method1,method3,method1,method4,method1])
+                sequence = Sequence([method1,method2,method1,method3])
                 self.Move(sequence)
             if(command[:4]=="TEMP"):
                 logging.info(f"Adjusting Temp To {command[5:]}") # extra char to remove space
