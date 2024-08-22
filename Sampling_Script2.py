@@ -220,10 +220,10 @@ class AmuzaConnection:
                 time = []
                 rate = []
                 method = []
-                for i in range(1, 97):
-                    method.append(Sequence([Method([i],167)]))
-                    rate.append(90)
-                    time.append(157)
+                for i in range(38, 97):
+                    method.append(Sequence([Method([i],77)]))
+                    rate.append(600)
+                    time.append(77)
                 self.Control_Move(method,rate,time)
                 
             if(command[:4]=="TEMP"):
@@ -347,11 +347,11 @@ class AmuzaConnection:
         for i in range(0, len(duration)):
             #sequence = Sequence(method[i])
             #Clean by dipping into the vat at start
-            pump.send_settings(-30000,120,0)
+            #pump.send_settings(-30000,150,0)
+            pump.send_settings(-30000,rate[i],0) if i ==0 else None
             pump.start_pump() if i == 0 else None
-            time.sleep(90)
+            time.sleep(60)
             self.Move(method[i])
-            pump.send_settings(-30000,rate[i],0)
             time.sleep(duration[i]+10) # Use a minimum delay of 4.5s but likely will need longer
         pump.stop_pump()
  
