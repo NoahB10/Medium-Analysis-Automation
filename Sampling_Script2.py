@@ -2,7 +2,6 @@ import bluetooth
 import threading
 from core import connect
 import time
-import sys
 import logging
 from datetime import datetime
 
@@ -205,26 +204,28 @@ class AmuzaConnection:
                 logging.info("Sent Sampling Command")
                 print("Sent Sampling Command")
                 # One way to write the methods are from well location names and time
-                time1 = 307
-                loc1 = ['D5']
-                loc1_m = self.well_mapping(loc1)
-                method1 = Sequence([Method(loc1_m,time1)])
-                time2 = 247 #Add seven seconds because it takes that long to reach well
-                loc2 = ['E5']
-                loc2_m = self.well_mapping(loc2)
-                loc3 = ['F5']
-                loc3_m = self.well_mapping(loc3)
-                loc4 = ['G6']
-                loc4_m = self.well_mapping(loc4)
-                loc5 = ['H6']
-                loc5_m = self.well_mapping(loc5)
-                method2 = Sequence([Method(loc2_m,time2)])
-                method3 = Sequence([Method(loc3_m,time1)])
-                method4 = Sequence([Method(loc4_m,time2)])
-                method5 = Sequence([Method(loc5_m,time1)])
-                rate1 = 150
-                rate2 = 100
-                self.Control_Move([method4,method5],[rate2,rate2],[time2,time1])
+                loc = ['A7','B7','C7','D7']
+                loc_m = self.well_mapping(loc)
+                time = [197,167,197,177]
+                rate = [90,90,100,100]
+                method = []
+                for i in range(0, len(loc)):
+                    print(loc[i])
+                    print(loc_m[i])
+                    method.append(Sequence([Method([loc_m[i]],time[i])]))
+                    print(method[i])
+                self.Control_Move(method,rate,time)
+                
+            if(command=="FULLPLATE"):
+                time = []
+                rate = []
+                method = []
+                for i in range(1, 97):
+                    method.append(Sequence([Method([i],167)]))
+                    rate.append(90)
+                    time.append(157)
+                self.Control_Move(method,rate,time)
+                
             if(command[:4]=="TEMP"):
                 logging.info(f"Adjusting Temp To {command[5:]}") # extra char to remove space
                 self.AdjustTemp(float(command[5:]))
@@ -334,7 +335,6 @@ class AmuzaConnection:
     
     def Insert(self):
         self.socket.send("@Z\n")
-        
     
     def Stop(self):
         self.socket.send("@T\n")
@@ -346,28 +346,14 @@ class AmuzaConnection:
     def Control_Move(self,method,rate,duration):
         for i in range(0, len(duration)):
             #sequence = Sequence(method[i])
+            #Clean by dipping into the vat at start
+            pump.send_settings(-30000,120,0)
+            pump.start_pump() if i == 0 else None
+            time.sleep(90)
             self.Move(method[i])
-            pump.send_settings(-1000,rate[i],0)
-            time.sleep(8)
-            pump.start_pump()
-            time.sleep(duration[i]-10)
-            pump.stop_pump()
-            time.sleep(12) # Use a minimum delay of 4.5s but likely will need longer
-            #Now clean by dipping into the vat at exit
-            """
-            for i in range(0,20):
-                self.socket.send("@q,01,0,000,0000,241,180,0")
-                print(i)
-                time.sleep(1)
-            pump.send_settings(-1000,200,0)
-            pump.start_pump()
-            time.sleep(30)
-            pump.stop_pump()
-            for i in range(0,5):
-                self.NeedleUp()
-                time.sleep(.5)
-            self.Stop()
-            """
+            pump.send_settings(-30000,rate[i],0)
+            time.sleep(duration[i]+10) # Use a minimum delay of 4.5s but likely will need longer
+        pump.stop_pump()
  
     def AdjustTemp(self, temperature):
         if not isinstance(methods, float):
@@ -443,11 +429,13 @@ if __name__ == '__main__':
     direction = -1   #Make positive for infuse and negative for withdrae
     units='μL/min'		 	# OPTIONS: 'mL/min','mL/hr','μL/min','μL/hr'
     
-    syringe = 10 #pick which syringe by using its size 
+    syringe = 30 #pick which syringe by using its size 
     if syringe == 1:
         diameter = 4.78 # 1ml syringe has diameter of 4.78
     elif syringe == 10:
         diameter = 14.5 # 10ml syringe has diameter of 14.5
+    elif syringe == 30:
+        diameter = 21.69 # 30ml syringe diameter
     PUMP_conn.setUnits(units)
     PUMP_conn.setDiameter(diameter) 
     
