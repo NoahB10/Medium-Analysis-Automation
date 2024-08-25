@@ -217,10 +217,11 @@ class AmuzaConnection:
                 self.Control_Move(method,rate,time)
                 
             if(command=="FULLPLATE"):
+                self.AdjustTemp(5.0) #Chill the plate temp to keep medium from changing
                 time = []
                 rate = []
                 method = []
-                for i in range(38, 97):
+                for i in range(40, 97):
                     method.append(Sequence([Method([i],77)]))
                     rate.append(600)
                     time.append(77)
@@ -352,7 +353,13 @@ class AmuzaConnection:
             pump.start_pump() if i == 0 else None
             time.sleep(60)
             self.Move(method[i])
-            time.sleep(duration[i]+10) # Use a minimum delay of 4.5s but likely will need longer
+            if i > 80:
+                delay = 3
+            elif i>55:
+                delay = 2
+            elif i>30:
+                delay = 1 
+            time.sleep(duration[i]+9+delay) # Use a minimum delay of 4.5s but likely will need longer
         pump.stop_pump()
  
     def AdjustTemp(self, temperature):
