@@ -217,14 +217,14 @@ class AmuzaConnection:
                 self.Control_Move(method,rate,time)
                 
             if(command=="FULLPLATE"):
-                self.AdjustTemp(5.0) #Chill the plate temp to keep medium from changing
+                self.AdjustTemp(5) #Chill the plate temp to keep medium from changing
                 time = []
                 rate = []
                 method = []
-                for i in range(40, 97):
-                    method.append(Sequence([Method([i],77)]))
-                    rate.append(600)
-                    time.append(77)
+                for i in range(1, 96):
+                    method.append(Sequence([Method([i],115)]))
+                    rate.append(350)
+                    time.append(115)
                 self.Control_Move(method,rate,time)
                 
             if(command[:4]=="TEMP"):
@@ -351,8 +351,9 @@ class AmuzaConnection:
             #pump.send_settings(-30000,150,0)
             pump.send_settings(-30000,rate[i],0) if i ==0 else None
             pump.start_pump() if i == 0 else None
-            time.sleep(60)
+            time.sleep(75)
             self.Move(method[i])
+            delay=0
             if i > 80:
                 delay = 3
             elif i>55:
@@ -363,8 +364,6 @@ class AmuzaConnection:
         pump.stop_pump()
  
     def AdjustTemp(self, temperature):
-        if not isinstance(methods, float):
-            raise TypeError("\'methods\' must be of type float")
         if(temperature < 0 or temperature > 99.9):
             raise ValueError("\'methods\' must be a list of length >= 1")
         self.socket.send(f"@V,{temperature}")
