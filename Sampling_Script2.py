@@ -180,7 +180,7 @@ class AmuzaConnection:
         for location in locations:
             result.append(self.well_map.get(location, None))  # Return None if location is not found
         return result  # Return the list of values
-    def generate_sequence():
+    def generate_sequence(self):
         #This is unique to Lea's Pattern 
         sequence = []
         # First part: A1, B1, A2, B2, ..., A12, B12
@@ -249,10 +249,10 @@ class AmuzaConnection:
                 time = []
                 rate = []
                 method = []
-                for i in range(17, 48):
-                    method.append(Sequence([Method([i],110)]))
+                for i in range(24, 48):
+                    method.append(Sequence([Method([i],95)]))
                     rate.append(400)
-                    time.append(110)
+                    time.append(95)
                 self.Control_Move(method,rate,time)
                 
             if(command=="FULLPLATE"):
@@ -271,10 +271,11 @@ class AmuzaConnection:
                 time = []
                 rate = []
                 method = []
-                sequence = self.generate_sequence
-                for i in range(0, 95):
-                    time.append(110)
-                    method.append(Sequence([Method(sequence[i],time[i])]))
+                locations = self.generate_sequence()
+                for i in range(14, 95):
+                    time.append(95)
+                    loc = locations[i]
+                    method.append(Sequence([Method([loc],95)]))
                     rate.append(400)
                 self.Control_Move(method,rate,time)
 
@@ -402,17 +403,13 @@ class AmuzaConnection:
             #pump.send_settings(-30000,150,0)
             #pump.send_settings(-30000,rate[i],0) if i ==0 else None
             #pump.start_pump() if i == 0 else None
+            A = method[i]
+            #print(A[3])
             time.sleep(75)
             self.Move(method[i])
             delay=0
-            if i > 80:
-                delay = 3
-            elif i>55:
-                delay = 2
-            elif i>30:
-                delay = 1 
-            time.sleep(duration[i]+9+delay) # Use a minimum delay of 4.5s but likely will need longer
-        #pump.stop_pump()
+            time.sleep(duration[i]+10) # Use a minimum delay of 4.5s but likely will need longer
+        #pump.stop_pump
  
     def AdjustTemp(self, temperature):
         if(temperature < 0 or temperature > 99.9):
