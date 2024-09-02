@@ -179,9 +179,37 @@ class AmuzaConnection:
         result = []
         for location in locations:
             result.append(self.well_map.get(location, None))  # Return None if location is not found
-        
         return result  # Return the list of values
-        
+    def generate_sequence():
+        #This is unique to Lea's Pattern 
+        sequence = []
+        # First part: A1, B1, A2, B2, ..., A12, B12
+        for col in range(1, 13):
+            sequence.append(f"A{col}")
+            sequence.append(f"B{col}")
+
+        # Then E1, F1, E2, F2, ..., E12, F12
+        for col in range(1, 13):
+            sequence.append(f"E{col}")
+            sequence.append(f"F{col}")
+
+        # Second part: C1, C2, ..., C12
+        for col in range(1, 13):
+            sequence.append(f"C{col}")
+
+        # Then G1, G2, ..., G12
+        for col in range(1, 13):
+            sequence.append(f"G{col}")
+
+        # Third part: E1, E2, ..., E12
+        for col in range(1, 13):
+            sequence.append(f"E{col}")
+
+        # Finally H1, H2, ..., H12
+        for col in range(1, 13):
+            sequence.append(f"H{col}")
+        sequence = self.well_mapping(sequence)
+        return sequence    
     
     def consoleInterface(self):
         while True:
@@ -237,7 +265,19 @@ class AmuzaConnection:
                     rate.append(400)
                     time.append(110)
                 self.Control_Move(method,rate,time)
-                
+            
+            if(command=="LEAPLATE"):
+                self.AdjustTemp(5) #Chill the plate temp to keep medium from changing
+                time = []
+                rate = []
+                method = []
+                sequence = self.generate_sequence
+                for i in range(0, 95):
+                    time.append(110)
+                    method.append(Sequence([Method(sequence[i],time[i])]))
+                    rate.append(400)
+                self.Control_Move(method,rate,time)
+
             if(command[:4]=="TEMP"):
                 logging.info(f"Adjusting Temp To {command[5:]}") # extra char to remove space
                 self.AdjustTemp(float(command[5:]))
