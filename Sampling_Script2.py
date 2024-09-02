@@ -216,15 +216,26 @@ class AmuzaConnection:
                     print(method[i])
                 self.Control_Move(method,rate,time)
                 
+            if(command=="HALFPLATE"):
+                self.AdjustTemp(5) #Chill the plate temp to keep medium from changing
+                time = []
+                rate = []
+                method = []
+                for i in range(17, 48):
+                    method.append(Sequence([Method([i],110)]))
+                    rate.append(400)
+                    time.append(110)
+                self.Control_Move(method,rate,time)
+                
             if(command=="FULLPLATE"):
                 self.AdjustTemp(5) #Chill the plate temp to keep medium from changing
                 time = []
                 rate = []
                 method = []
                 for i in range(1, 96):
-                    method.append(Sequence([Method([i],115)]))
-                    rate.append(350)
-                    time.append(115)
+                    method.append(Sequence([Method([i],110)]))
+                    rate.append(400)
+                    time.append(110)
                 self.Control_Move(method,rate,time)
                 
             if(command[:4]=="TEMP"):
@@ -349,8 +360,8 @@ class AmuzaConnection:
             #sequence = Sequence(method[i])
             #Clean by dipping into the vat at start
             #pump.send_settings(-30000,150,0)
-            pump.send_settings(-30000,rate[i],0) if i ==0 else None
-            pump.start_pump() if i == 0 else None
+            #pump.send_settings(-30000,rate[i],0) if i ==0 else None
+            #pump.start_pump() if i == 0 else None
             time.sleep(75)
             self.Move(method[i])
             delay=0
@@ -361,7 +372,7 @@ class AmuzaConnection:
             elif i>30:
                 delay = 1 
             time.sleep(duration[i]+9+delay) # Use a minimum delay of 4.5s but likely will need longer
-        pump.stop_pump()
+        #pump.stop_pump()
  
     def AdjustTemp(self, temperature):
         if(temperature < 0 or temperature > 99.9):
@@ -429,8 +440,8 @@ if __name__ == '__main__':
     baudrate=9600 # MUST set baudrate in pump "System Settings", and MUST match this rate:
     port = '/dev/ttyUSB0' #for linux and windows is 'COM15'
     # initiate Connection 
-    PUMP_conn = connect.Connection(port= port,baudrate=baudrate, multipump=False)
-    pump = Pump(PUMP_conn)
+    #PUMP_conn = connect.Connection(port= port,baudrate=baudrate, multipump=False)
+    #pump = Pump(PUMP_conn)
     # Setup parameters for pump 
     direction = -1   #Make positive for infuse and negative for withdrae
     units='μL/min'		 	# OPTIONS: 'mL/min','mL/hr','μL/min','μL/hr'
@@ -442,8 +453,8 @@ if __name__ == '__main__':
         diameter = 14.5 # 10ml syringe has diameter of 14.5
     elif syringe == 30:
         diameter = 21.69 # 30ml syringe diameter
-    PUMP_conn.setUnits(units)
-    PUMP_conn.setDiameter(diameter) 
+    #PUMP_conn.setUnits(units)
+    #PUMP_conn.setDiameter(diameter) 
     
     connection = AmuzaConnection(True)
     connection.connect()
