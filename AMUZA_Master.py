@@ -1,13 +1,14 @@
 # Script by Moshe Kashlinsky, Undergraduate at UMD
 # Contact at kashlinskymoshe@gmail.com
+#Updates by Noah Bernten 
 
 import bluetooth
 import threading
 import time
 import sys
 import logging
-
 from datetime import datetime
+
 class Method:
     def __init__(self, ports, time):
         if not isinstance(ports, list):
@@ -133,10 +134,39 @@ class AmuzaConnection:
         result = []
         for location in locations:
             result.append(self.well_map.get(location, None))  # Return None if location is not found
-        
         return result  # Return the list of values
-        
     
+    def generate_sequence(self):
+        #This is unique to Lea's Pattern 
+        sequence = []
+        # First part: A1, B1, A2, B2, ..., A12, B12
+        for col in range(1, 13):
+            sequence.append(f"A{col}")
+            sequence.append(f"B{col}")
+
+        # Then E1, F1, E2, F2, ..., E12, F12
+        for col in range(1, 13):
+            sequence.append(f"E{col}")
+            sequence.append(f"F{col}")
+
+        # Second part: C1, C2, ..., C12
+        for col in range(1, 13):
+            sequence.append(f"C{col}")
+
+        # Then G1, G2, ..., G12
+        for col in range(1, 13):
+            sequence.append(f"G{col}")
+
+        # Third part: E1, E2, ..., E12
+        for col in range(1, 13):
+            sequence.append(f"E{col}")
+
+        # Finally H1, H2, ..., H12
+        for col in range(1, 13):
+            sequence.append(f"H{col}")
+        sequence = self.well_mapping(sequence)
+        return sequence    
+        
     def consoleInterface(self):
         while True:
             command = input()
@@ -158,22 +188,17 @@ class AmuzaConnection:
                 logging.info("Sent Sampling Command")
                 print("Sent Sampling Command")
                 # One way to write the methods are from well location names and time
-                time1 = 127
-                loc1 = ['H2']
-                loc1_m = self.well_mapping(loc1)
-                method1 = Method(loc1_m,time1)
-                time2 = 307 #Add seven seconds because it takes that long to reach well
-                loc2 = ['G2']
-                loc2_m = self.well_mapping(loc2)
-                loc3 = ['F2']
-                loc3_m = self.well_mapping(loc3)
-                loc4 = ['G1']
-                loc4_m = self.well_mapping(loc4)
-                method2 = Method(loc2_m,time2)
-                method3 = Method(loc3_m,time2)
-                method4 = Method(loc4_m,time2)
-                sequence = Sequence([method1,method2,method1,method3])
-                self.Move(sequence)
+                loc = ['A7','B7','C7','D7']
+                loc_m = self.well_mapping(loc)
+                time = [197,167,197,177]
+                method = []
+                for i in range(0, len(loc)):
+                    print(loc[i])
+                    print(loc_m[i])
+                    method.append(Sequence([Method([loc_m[i]],time[i])]))
+                    print(method[i])
+                #self.Move(method)
+
             if(command[:4]=="TEMP"):
                 logging.info(f"Adjusting Temp To {command[5:]}") # extra char to remove space
                 self.AdjustTemp(float(command[5:]))
