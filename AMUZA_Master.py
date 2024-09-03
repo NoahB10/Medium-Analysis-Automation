@@ -316,8 +316,6 @@ class AmuzaConnection:
         self.socket.send(str(sequence))
     
     def AdjustTemp(self, temperature):
-        if not isinstance(methods, float):
-            raise TypeError("\'methods\' must be of type float")
         if(temperature < 0 or temperature > 99.9):
             raise ValueError("\'methods\' must be a list of length >= 1")
         self.socket.send(f"@V,{temperature}")
