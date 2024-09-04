@@ -12,6 +12,7 @@ class PotentiostatReader:
         self.data_block = [b'\x00'] * package_length
         self.start_timestamp = None
         self.serial_connection = None
+        self.sample_number = 1
 
     def open_serial_connection(self):
         if self.serial_connection is None:
@@ -50,12 +51,13 @@ class PotentiostatReader:
         to_insert.append(temperature)
         return to_insert
     
-    def  line_one(self):
+    def write_header(self):
         with open(self.output_filename, 'w') as file:
-            first_line = "Time/s\tCh1/nA\tCh2/nA\tCh3/nA\tCh4/nA\tCh5/nA\tCh6/nA\tT/°C"
+            first_line = "Sample\tTime/s\tCh1/nA\tCh2/nA\tCh3/nA\tCh4/nA\tCh5/nA\tCh6/nA\tT/°C"
             print(first_line)
             file.write(first_line + "\n")
 
+    
     def get_data(self):
         self.open_serial_connection()
         accumulated_bytes = b''
@@ -96,18 +98,21 @@ class PotentiostatReader:
 
                 # Convert data to string format for saving
                 to_save = [str(x) for x in out_data]
-                #print("to_save list:", to_save)  # Debugging: Print the to_save list
-                if len(to_save) >= 7:
+
+                # Ensure the data block has enough elements
+                if len(to_save) >= 6:  # Check for at least 6 data points (channels)
                     try:
                         # Converting input data to currents in nanoamperes
                         gain = 50 / (2**15 - 1)
                         to_save = [str(round(int(x) * gain, 3)) for x in to_save[0:6]]
 
-                        # Converting temperature to °C
-                        """
-                        temperature = str(round(float(to_save[6]) / 16, 3))
+                        # Check if the temperature value is available
+                        if len(out_data) > 6:
+                            temperature = str(round(float(out_data[6]) / 16, 3))
+                        else:
+                            temperature = "0"  # Insert 0 if temperature is not present
                         to_save.append(temperature)
-                        """
+
                         # Generating timestamp
                         timestamp = round(time.time(), 4)
                         if self.start_timestamp is None:
@@ -117,20 +122,30 @@ class PotentiostatReader:
                             delta_time = timestamp - self.start_timestamp
                         to_save.insert(0, str(round(delta_time, 1)))
 
+                        # Insert sample number at the beginning
+                        to_save.insert(0, str(self.sample_number))
+                        self.sample_number += 1
+
+                        # Append zeros to match the format if needed
+                        while len(to_save) < 83:  # Adjust this based on your format
+                            to_save.append("0")
+
                         return to_save
                     except ValueError as e:
-                        print(f"Error converting temperature: {to_save[6]}, {e}")
+                        print(f"Error converting temperature: {e}")
                         return None
                 else:
-                    print("Error: Data block is incomplete:", to_save)
+                    print("Error: Data block is incomplete or missing values:", to_save)
                     return None
 
         # If data is not valid or is incomplete, return None
         return None
 
-
-
     def run(self):
+        # Ensure the header is written only once
+        if self.sample_number == 1:
+            self.write_header()
+        
         data = self.get_data()
         if data is not None:
             with open(self.output_filename, 'a') as file:
