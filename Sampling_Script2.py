@@ -183,6 +183,7 @@ class AmuzaConnection:
     def generate_sequence(self):
         #This is unique to Lea's Pattern 
         sequence = []
+        """
         # First part: A1, B1, A2, B2, ..., A12, B12
         for col in range(1, 13):
             sequence.append(f"A{col}")
@@ -200,13 +201,28 @@ class AmuzaConnection:
         # Then G1, G2, ..., G12
         for col in range(1, 13):
             sequence.append(f"G{col}")
-
+        
         # Third part: E1, E2, ..., E12
         for col in range(1, 13):
-            sequence.append(f"E{col}")
+            sequence.append(f"D{col}")
 
         # Finally H1, H2, ..., H12
         for col in range(1, 13):
+            sequence.append(f"H{col}")
+        """
+        # Second part: C1, C2, ..., C12
+        for col in range(1, 6):
+            sequence.append(f"A{col}")
+            sequence.append(f"B{col}")
+            sequence.append(f"C{col}")
+
+        for col in range(1, 5):
+            sequence.append(f"E{col}")
+            sequence.append(f"F{col}")
+            sequence.append(f"G{col}")
+        for col in range(1,6):
+            sequence.append(f"D{col}")
+        for col in range(1,5):
             sequence.append(f"H{col}")
         sequence = self.well_mapping(sequence)
         return sequence    
@@ -272,8 +288,9 @@ class AmuzaConnection:
                 rate = []
                 method = []
                 locations = self.generate_sequence()
-                for i in range(14, 95):
-                    time.append(95)
+                for i in range(0, len(locations)):
+                    #print(i)
+                    time.append(95)#usually 95
                     loc = locations[i]
                     method.append(Sequence([Method([loc],95)]))
                     rate.append(400)
@@ -405,7 +422,7 @@ class AmuzaConnection:
             #pump.start_pump() if i == 0 else None
             A = method[i]
             #print(A[3])
-            time.sleep(75)
+            time.sleep(75)#usually 75
             self.Move(method[i])
             delay=0
             time.sleep(duration[i]+10) # Use a minimum delay of 4.5s but likely will need longer
