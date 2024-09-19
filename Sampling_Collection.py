@@ -13,40 +13,37 @@ t_sampling = 95  # used to be 110 but 95 seems to be pretty accurate for 180 mic
 
 # Define the control sequence definition
 def Control_Move(method, duration):
-    for i in range(0, len(duration)):
+    for i in range(0, len(method)):
         time.sleep(t_buffer)
         connection.Move(method[i])
         delay = 1
-        time.sleep(duration[i] + 9 + delay)  # Use a minimum delay of 4.5s but likely will need longer
+        time.sleep(duration[0] + 9 + delay)  # Use a minimum delay of 4.5s but likely will need longer
 
 # Function to run the AMUZA control sequence
 def run_command(command):
+    method = []
     if command == "HALFPLATE":
         connection.AdjustTemp(5)  # Chill the plate temp to keep medium from changing
-        method = []
-        for i in range(1, 48):
+        for i in range(0, 48):
             method.append(AMUZA_Master.Sequence([AMUZA_Master.Method([i], t_sampling)]))
         Control_Move(method, [t_sampling])
 
     elif command == "FULLPLATE":
         connection.AdjustTemp(5)  # Chill the plate temp to keep medium from changing
-        method = []
-        for i in range(7, 96):
+        for i in range(0, 96):
             method.append(AMUZA_Master.Sequence([AMUZA_Master.Method([i], t_sampling)]))
         Control_Move(method, [t_sampling])
 
     elif command == "LEAPLATE":
         connection.AdjustTemp(5)  # Chill the plate temp to keep medium from changing
-        method = []
         locations = connection.generate_sequence()
-        for i in range(0, 95):
+        for i in range(0, 96):
             loc = locations[i]
             method.append(AMUZA_Master.Sequence([AMUZA_Master.Method([loc], t_sampling)]))
         Control_Move(method, [t_sampling])
     
     elif command == "MOVE":
         connection.AdjustTemp(5)  # Chill the plate temp to keep medium from changing
-        method = []
         wells = input("Please insert comma seperated well sequence like A1,B2: ")
         well_list = wells.replace(" ", "").split(",")
         locations = connection.well_mapping(well_list)
