@@ -31,7 +31,7 @@ def run_command(command):
     elif command == "FULLPLATE":
         connection.AdjustTemp(5)  # Chill the plate temp to keep medium from changing
         method = []
-        for i in range(1, 96):
+        for i in range(7, 96):
             method.append(AMUZA_Master.Sequence([AMUZA_Master.Method([i], t_sampling)]))
         Control_Move(method, [t_sampling])
 
@@ -86,7 +86,7 @@ datalogger_thread.start()
 
 # Loop for continuous command input
 while True:
-    command = input("Please type a mode: INSERT, EJECT, HALFPLATE, FULLPLATE, LEAPLATE (type EXIT to stop):").upper()
+    command = input("Please type a mode: INSERT, EJECT, HALFPLATE, FULLPLATE, LEAPLATE, MOVE (type EXIT to stop):").upper()
     
     # Check if the user wants to exit
     if command == "EXIT":
