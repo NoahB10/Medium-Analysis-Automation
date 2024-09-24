@@ -22,24 +22,24 @@ def Control_Move(method, duration):
 # Function to run the AMUZA control sequence
 def run_command(command):
     method = []
-    if command == "HALFPLATE":
+    if command == "RUNPLATE":
         connection.AdjustTemp(5)  # Chill the plate temp to keep medium from changing
-        for i in range(0, 48):
+        size = input("Please insert comma seperated dimenstion of the plate (Rows,Columns) MAX(8,12): ")
+        size = [int(dim) for dim in size.split(",")]
+        if size[0] > 8 or size[1] > 12:
+            print("Error: Maximum size allowed is 8 rows and 12 columns.")
+        locations = []  # Initialize the dictionary
+        rows = "ABCDEFGH"[:size[0]]  # Restrict to the number of rows as per input
+        columns = range(1, size[1] + 1)  # Restrict columns as per input
+        for row in rows:
+            for column in columns:
+                well_location = f"{row}{column}"
+                locations.append(well_location)
+        locations = connection.well_mapping(locations)
+        print(locations)
+        print(size[0]*size[1])
+        for i in range(0, size[0]*size[1]):
             method.append(AMUZA_Master.Sequence([AMUZA_Master.Method([i], t_sampling)]))
-        Control_Move(method, [t_sampling])
-
-    elif command == "FULLPLATE":
-        connection.AdjustTemp(5)  # Chill the plate temp to keep medium from changing
-        for i in range(0, 96):
-            method.append(AMUZA_Master.Sequence([AMUZA_Master.Method([i], t_sampling)]))
-        Control_Move(method, [t_sampling])
-
-    elif command == "LEAPLATE":
-        connection.AdjustTemp(5)  # Chill the plate temp to keep medium from changing
-        locations = connection.generate_sequence()
-        for i in range(0, 96):
-            loc = locations[i]
-            method.append(AMUZA_Master.Sequence([AMUZA_Master.Method([loc], t_sampling)]))
         Control_Move(method, [t_sampling])
     
     elif command == "MOVE":
@@ -83,7 +83,7 @@ datalogger_thread.start()
 
 # Loop for continuous command input
 while True:
-    command = input("Please type a mode: INSERT, EJECT, HALFPLATE, FULLPLATE, LEAPLATE, MOVE (type EXIT to stop):").upper()
+    command = input("Please type a mode: INSERT, EJECT, RUNPLATE, MOVE (type EXIT to stop):").upper()
     
     # Check if the user wants to exit
     if command == "EXIT":
