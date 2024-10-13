@@ -8,8 +8,8 @@ connection = AMUZA_Master.AmuzaConnection(True)
 connection.connect()
 
 # Set global sparcing variables for time
-t_buffer = 75
-t_sampling = 95  # used to be 110 but 95 seems to be pretty accurate for 180 microL
+t_buffer = 66#75
+t_sampling = 91#95  # used to be 110 but 95 seems to be pretty accurate for 180 microL
 
 # Define the control sequence definition
 def Control_Move(method, duration):
@@ -23,7 +23,7 @@ def Control_Move(method, duration):
 def run_command(command):
     method = []
     if command == "RUNPLATE":
-        connection.AdjustTemp(5)  # Chill the plate temp to keep medium from changing
+        connection.AdjustTemp(6)  # Chill the plate temp to keep medium from changing
         size = input("Please insert comma seperated dimenstion of the plate (Rows,Columns) MAX(8,12): ")
         size = [int(dim) for dim in size.split(",")]
         if size[0] > 8 or size[1] > 12:
@@ -36,14 +36,15 @@ def run_command(command):
                 well_location = f"{row}{column}"
                 locations.append(well_location)
         locations = connection.well_mapping(locations)
-        print(locations)
-        print(size[0]*size[1])
-        for i in range(0, size[0]*size[1]):
-            method.append(AMUZA_Master.Sequence([AMUZA_Master.Method([i], t_sampling)]))
-        Control_Move(method, [t_sampling])
+        #(locations)
+        #print(size[0]*size[1])
+        for loc in locations:  # Use the mapped well locations, not the index `i`
+            method.append(AMUZA_Master.Sequence([AMUZA_Master.Method([loc], t_sampling)]))
+
+        Control_Move(method[53:], [t_sampling])#CONTINUE FROM WELL 7
     
     elif command == "MOVE":
-        connection.AdjustTemp(5)  # Chill the plate temp to keep medium from changing
+        connection.AdjustTemp(6)  # Chill the plate temp to keep medium from changing
         wells = input("Please insert comma seperated well sequence like A1,B2: ")
         well_list = wells.replace(" ", "").split(",")
         locations = connection.well_mapping(well_list)
@@ -78,8 +79,8 @@ filename = input("Please input a Filename:")
 filename = filename + '.txt'
 
 # Start the DataLogger in a separate thread, passing the filename
-datalogger_thread = threading.Thread(target=run_datalogger, args=(filename,))
-datalogger_thread.start()
+#datalogger_thread = threading.Thread(target=run_datalogger, args=(filename,))
+#datalogger_thread.start()
 
 # Loop for continuous command input
 while True:
